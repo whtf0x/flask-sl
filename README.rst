@@ -22,8 +22,8 @@ To install from source:
 Configuration
 -------------
 
-After configuring your application pass it to a 
-:class:`SLAware` object::
+After configuring your application pass it to a *SLAware* 
+object::
 
     from flask import Flask
     from flask.ext.sl import SLAware
@@ -33,17 +33,17 @@ After configuring your application pass it to a
     sl = SLAware(app)
 
 If you are using an application factory the extension may be
-configured with the standard :meth:`init_app` function.
+configured with the standard *init_app* function.
 
 Usage
 -----
 
-Flask-SL adds a :attr:`from_sl` attribute to the `Flask`_ :class:`request` 
+Flask-SL adds a *from_sl* attribute to the `Flask`_ *request* 
 object. An `example application`_ is available in the `git repository`_.
 
 In addition, if the configuration value SL_PARSE_XHEADERS is True
 (default) then SL objects' `X-SecondLife`_ Headers are parsed into a 
-:class:`SLRequestObject` available as the attribute :attr:`sl_object`::
+*SLRequestObject* available as the attribute *sl_object*::
 
     @app.route('/')
     def index():
@@ -53,7 +53,7 @@ In addition, if the configuration value SL_PARSE_XHEADERS is True
         else:
             return 'Hello, visitor!'
 
-A decorator :meth:`sl_required` is provided to limit routes to SL-based 
+A decorator *sl_required* is provided to limit routes to SL-based 
 requests::
 
     @app.route('/sl_only')
