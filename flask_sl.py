@@ -3,9 +3,9 @@
     flaskext.sl
     ~~~~~~~~~~~~~~~~~~~~
 
-    Impliments basic recognition of Second Life® based (LSL) requests.
+    Implements basic recognition of Second Life® based (LSL) requests.
 
-    :copyright: (c) 2011 by Bennett Goble.
+    :copyright: (c) 2012 by Bennett Goble.
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import absolute_import
@@ -34,12 +34,15 @@ class SLAware(object):
     """Flask-SecondLife main class. Initializing this extension with
     a Flask application will cause all requests to receive the attribute
     :attr: `from_sl` and a parsed Python object :attr: `sl_object` 
-    (:class: `SLRequestObject`) if ``'SL_PARSE_XHEADERS'`` is `True` (Default.)
+    (:class:`SLRequestObject`) if ``'SL_PARSE_XHEADERS'`` is `True` (Default.)
     """
 
     def __init__(self, app=None):
 
         app.config.setdefault('SL_PARSE_XHEADERS', True)
+
+        self.bad_request_callback = None
+        self.unauthorized_callback = None
 
         if app is not None:
             self.init_app(app)
@@ -55,7 +58,32 @@ class SLAware(object):
         request.from_sl = from_sl(request.remote_addr)
 
         if request.from_sl and self.app.config['SL_PARSE_XHEADERS']:
-            request.sl_object = SLRequestObject(request=request)
+            try:
+                request.sl_object = SLRequestObject(request=request)
+            except ValueError:
+                self.bad_request()
+
+    def bad_request_handler(self, callback):
+        """Set callback for :meth:`bad_request` method."""
+        self.bad_request_handler = callback
+    
+    def bad_request(self):
+        """Called when there is an ill-formatted request"""
+        if self.bad_request_callback:
+            return self.bad_request_callback()
+        abort(400)
+
+    def unauthorized_handler(self, callback):
+        """Set callback for :meth:`unauthorized` method."""
+        self.unauthorized_callback = callback
+
+    def unauthorized(self):
+        """Called when request does not originate from SL
+        on a route decorated with :meth:`sl_required`."""
+        if self.unauthorized_callback:
+            return self.unauthorized_callback()
+        abort(401)
+
 
 
 def sl_required(fn):
@@ -103,19 +131,13 @@ class SLVector3():
 
     @staticmethod
     def from_xheader(vector_str):
-        try:
-            x, y, z = re.split('\(|, |\)', vector_str)[1:4]
-            return SLVector3(x=float(x), y=float(y), z=float(y))
-        except ValueError:
-            return SLVector3()
+        x, y, z = re.split('\(|, |\)', vector_str)[1:4]
+        return SLVector3(x=float(x), y=float(y), z=float(y))
 
     @staticmethod
     def from_xheader_vel(vector_str):
-        try:
-            x, y, z = vector_str.split(', ')
-            return SLVector3(x=float(x), y=float(y), z=float(y))
-        except ValueError:
-            return SLVector3()
+        x, y, z = vector_str.split(', ')
+        return SLVector3(x=float(x), y=float(y), z=float(y))
 
 
 class SLQuaternion():
@@ -140,11 +162,8 @@ class SLQuaternion():
 
     @staticmethod
     def from_xheader(quaternion_str):
-        try:
-            x, y, z, s = quaternion_str.split(', ')
-            return SLVector3(x=float(x), y=float(y), z=float(y), s=float(s))
-        except ValueError:
-            return SLQuaternion()
+        x, y, z, s = quaternion_str.split(', ')
+        return SLVector3(x=float(x), y=float(y), z=float(y), s=float(s))
 
 
 class SLRegion(object):
@@ -156,15 +175,11 @@ class SLRegion(object):
 
     @staticmethod
     def from_xheader(region_str):
-        try:
-            name, x, y = re.split(',|\(|\)|', region_str)[:3]
-            region = SLRegion()
-            region.name = name
-            region.x = int(x)
-            region.y = int(y)
-        except ValueError:
-            return SLRegion()
-        return region
+        name, x, y = re.split(',|\(|\)|', region_str)[:3]
+        region = SLRegion()
+        region.name = name
+        region.x = int(x)
+        region.y = int(y)
 
     def __repr__(self):
         return "<%s, (%s, %s)>" % (self.name, self.x, self.y)
@@ -199,7 +214,3 @@ class SLRequestObject(object):
     def __repr__(self):
         return "<SLRequestObject %s (Owner: %s, Location: %s %s)>" % \
             (self.name, self.owner_name, self.region.name, self.position)
-
-
-def SLHMAC(plaintext, key):
-    return hashlib.sha1(key + hashlib.sha1(key + plaintext).hexdigest()).hexdigest()

@@ -5,5 +5,9 @@ Changes between Flask-SL releases.
 
 Version 0.01
 ````````````
-
 - Initial release
+
+Version 0.02
+````````````
+- Bad request handlers SLAware.bad_request_handler and SLAware.unauthorized_handler
+- Try-Except blocks removed from header parsing functions

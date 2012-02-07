@@ -1,6 +1,6 @@
 Flask-SL
 ========
-Version 0.01
+Version 0.02
 
 Flask-SL is an extension for [Flask][flask] that adds basic recognition
 of [Second Life][sl]&reg; based ([LSL][lsl] script) requests. It can 
@@ -38,7 +38,7 @@ configured with the standard *init_app* function.
 Usage
 -----
 
-Flask-SL adds a *from_sl* attribute to the [Flask][flask] request 
+Flask-SL adds a *from_sl* attribute to the Flask request 
 object. See the [example application][examples].
 
 In addition, if the configuration value SL_PARSE_XHEADERS is True
@@ -48,7 +48,6 @@ In addition, if the configuration value SL_PARSE_XHEADERS is True
 ```python
 @app.route('/')
 def index():
-    response.headers['Content-Type'] = 'text/plain'
     if request.from_sl:
         return 'Hello, %s!' % request.sl_object.name
     else:
@@ -56,14 +55,33 @@ def index():
 ```
 
 A decorator *sl_required* is provided to limit routes to SL-based 
-requests::
+requests:
 
 ```python
-@app.route('/sl_only')
 @sl_required
+@app.route('/sl_only')
 def sl_only():
-    pass  
+    return 'Hello, SL object.' 
 ```
+
+Bad Response Callbacks
+----------------------
+If Flask-SL receives a non-SL originating request on a route
+restricted with `sl_required` it will `abort` the response with
+status 401. If you wish to handle this differently decorate a
+function with `SLAware.unauthorized_handler`.
+
+```python
+@sl.unauthorized_handler
+def unauthorized():
+    return 'Request not from SL.'
+```
+
+The decorator `SLAware.bad_request_handler` is also supplied to
+specify a callback for requests with un-parsable X-SecondLife
+headers. Generally this should never happen, but if Flask-SL
+is adapted for use with Non-Linden Labs&reg; servers it may
+be useful. 
 
 [flask]: http://flask.pocoo.org/
 [sl]: http://secondlife.com/ "Official Second Life Homepage"
