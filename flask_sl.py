@@ -39,8 +39,6 @@ class SLAware(object):
 
     def __init__(self, app=None):
 
-        app.config.setdefault('SL_PARSE_XHEADERS', True)
-
         self.bad_request_callback = None
         self.unauthorized_callback = None
 
@@ -51,6 +49,7 @@ class SLAware(object):
 
     def init_app(self, app):
         self.app = app
+        self.app.config.setdefault('SL_PARSE_XHEADERS', True)
         self.app.before_request(self.before_request)
 
     def before_request(self):
