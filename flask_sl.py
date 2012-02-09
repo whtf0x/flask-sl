@@ -13,7 +13,7 @@ from functools import wraps
 import re, hashlib
 
 from netaddr import IPAddress, IPNetwork
-from flask import _request_ctx_stack, abort
+from flask import _request_ctx_stack, request, abort
 
 
 __all__ = ['SLAware', 'sl_required']
@@ -57,10 +57,10 @@ class SLAware(object):
         request.from_sl = from_sl(request.remote_addr)
 
         if request.from_sl and self.app.config['SL_PARSE_XHEADERS']:
-            try:
-                request.sl_object = SLRequestObject(request=request)
-            except ValueError:
-                self.bad_request()
+            #try:
+            request.sl_object = SLRequestObject(request=request)
+            #except ValueError, AttributeError:
+            #    self.bad_request()
 
     def bad_request_handler(self, callback):
         """Set callback for :meth:`bad_request` method."""
@@ -83,23 +83,23 @@ class SLAware(object):
             return self.unauthorized_callback()
         abort(401)
 
+    def sl_required(self, fn):
+        """Use this decorator to limit routes to requests
+        originating from Second Life. Aborts with an 
+        Unauthorized 401 response.
 
+            @app.route('/sl')
+            @sl.sl_required
+            def sl_only():
+                pass
 
-def sl_required(fn):
-    """Use this decorator to limit routes to requests
-    originating from Second Life. Aborts with an 
-    Unauthorized 401 response.
-
-        @app.route('/sl')
-        @sl_required
-        def sl_only():
-            pass
-
-    """
-    @wraps(fn)
-    def wrapper(*args, **kwargs):
-        if not request.from_sl():
-            abort(401)
+        """
+        @wraps(fn)
+        def decorated_view(*args, **kwargs):
+            if not request.from_sl:
+                self.unauthorized() 
+            return fn(*args, **kwargs)           
+        return decorated_view
 
 
 def from_sl(address):
@@ -130,12 +130,7 @@ class SLVector3():
 
     @staticmethod
     def from_xheader(vector_str):
-        x, y, z = re.split('\(|, |\)', vector_str)[1:4]
-        return SLVector3(x=float(x), y=float(y), z=float(y))
-
-    @staticmethod
-    def from_xheader_vel(vector_str):
-        x, y, z = vector_str.split(', ')
+        x, y, z = re.findall(r"\d+.\d+", vector_str)
         return SLVector3(x=float(x), y=float(y), z=float(y))
 
 
@@ -161,8 +156,8 @@ class SLQuaternion():
 
     @staticmethod
     def from_xheader(quaternion_str):
-        x, y, z, s = quaternion_str.split(', ')
-        return SLVector3(x=float(x), y=float(y), z=float(y), s=float(s))
+        x, y, z, s = re.findall(r"\d+.\d+", quaternion_str)
+        return SLQuaternion(x=float(x), y=float(y), z=float(y), s=float(s))
 
 
 class SLRegion(object):
@@ -174,11 +169,13 @@ class SLRegion(object):
 
     @staticmethod
     def from_xheader(region_str):
-        name, x, y = re.split(',|\(|\)|', region_str)[:3]
+        name = re.findall(r"([\w ]+) \(", region_str)[0]
+        x, y = re.findall(r"\d+", region_str)
         region = SLRegion()
         region.name = name
         region.x = int(x)
         region.y = int(y)
+        return region
 
     def __repr__(self):
         return "<%s, (%s, %s)>" % (self.name, self.x, self.y)
@@ -206,7 +203,7 @@ class SLRequestObject(object):
         self.region     = SLRegion.from_xheader(request.headers["X-SecondLife-Region"])
         self.position   = SLVector3.from_xheader(request.headers["X-SecondLife-Local-Position"])
         self.rotation   = SLQuaternion.from_xheader(request.headers["X-SecondLife-Local-Rotation"])
-        self.velocity   = SLVector3.from_xheader_vel(request.headers["X-SecondLife-Local-Velocity"])
+        self.velocity   = SLVector3.from_xheader(request.headers["X-SecondLife-Local-Velocity"])
         self.owner_name = request.headers["X-SecondLife-Owner-Name"]
         self.owner_key  = request.headers["X-SecondLife-Owner-Key"]
 

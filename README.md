@@ -12,8 +12,8 @@ Installation
 
 To install from source:
 
-    $ tar xvfz flask-sl-v0.01.tar.gz 
-    $ cd flask-sl-v0.01
+    $ git clone git@github.com:nivardus/Flask-SL.git
+    $ cd Flask-SL
     $ python setup.py build
     $ python setup.py install
 
@@ -54,12 +54,12 @@ def index():
         return 'Hello, visitor!'
 ```
 
-A decorator *sl_required* is provided to limit routes to SL-based 
+A decorator *SLAware.sl_required* is provided to limit routes to SL-based 
 requests:
 
 ```python
-@sl_required
 @app.route('/sl_only')
+@sl.sl_required
 def sl_only():
     return 'Hello, SL object.' 
 ```

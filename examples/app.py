@@ -3,7 +3,7 @@ Flask-SL Example App
 
 """
 from flask import Flask, request, Response
-from flask.ext.sl import SLAware, sl_required
+from flask.ext.sl import SLAware
 
 
 app = Flask(__name__)
@@ -21,8 +21,8 @@ def index():
     return response
     
 
-@sl_required
 @app.route('/sl')
+@sl.sl_required
 def sl_only():
     response = Response(mimetype='text/plain')
     response.data = "Hello, SL Object from %s." % \
@@ -31,4 +31,4 @@ def sl_only():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port=2600)
