@@ -12,8 +12,8 @@ Installation
 
 To install from source:
 
-    $ git clone git@github.com:nivardus/Flask-SL.git
-    $ cd Flask-SL
+    $ git clone git@github.com:nivardus/flask-sl.git
+    $ cd flask-sl
     $ python setup.py build
     $ python setup.py install
 
