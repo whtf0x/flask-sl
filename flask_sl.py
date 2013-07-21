@@ -59,7 +59,7 @@ class SLAware(object):
         if request.from_sl and self.app.config['SL_PARSE_XHEADERS']:
             try:
                 request.sl_object = SLRequestObject(request=request)
-            except ValueError, AttributeError:
+            except (ValueError, AttributeError) as e:
                 self.bad_request()
 
     def bad_request_handler(self, callback):
