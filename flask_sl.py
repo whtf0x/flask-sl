@@ -130,7 +130,7 @@ class SLVector3():
 
     @staticmethod
     def from_xheader(vector_str):
-        x, y, z = re.findall(r"\d+.\d+", vector_str)
+        x, y, z = re.findall(r"\-?\d+.\d+", vector_str)
         return SLVector3(x=float(x), y=float(y), z=float(y))
 
 
@@ -156,7 +156,7 @@ class SLQuaternion():
 
     @staticmethod
     def from_xheader(quaternion_str):
-        x, y, z, s = re.findall(r"\d+.\d+", quaternion_str)
+        x, y, z, s = re.findall(r"\-?\d+.\d+", quaternion_str)
         return SLQuaternion(x=float(x), y=float(y), z=float(y), s=float(s))
 
 
