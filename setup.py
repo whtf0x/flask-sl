@@ -11,9 +11,9 @@ from setuptools import setup
 
 setup(
     name='Flask-SL',
-    version='0.02',
+    version='0.0.3',
     url='https://github.com/nivardus/flask-sl',
-    license='BSD',
+    license='MIT',
     author='Bennett Goble',
     author_email='nivardus@gmail.com',
     description='Basic recognition of Second Life® requests.',
