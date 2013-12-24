@@ -15,7 +15,7 @@ sl = SLAware(app)
 def index():
     response = Response(mimetype='text/plain')
     if request.from_sl:
-        response.data = 'Hello, %s!' % request.sl_object.name
+        response.data = 'Hello, %s!' % request.sl.name
     else:
         response.data = 'Hello, visitor!'
     return response
@@ -26,7 +26,7 @@ def index():
 def sl_only():
     response = Response(mimetype='text/plain')
     response.data = "Hello, SL Object from %s." % \
-        request.sl_object.region.name
+        request.sl.region.name
     return response
 
 

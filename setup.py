@@ -11,9 +11,8 @@ from setuptools import setup
 
 setup(
     name='Flask-SL',
-    version='0.0.3',
+    version='0.0.4',
     url='https://github.com/nivardus/flask-sl',
-    download_url = 'https://github.com/nivardus/flask-sl/archive/v0.0.3.tar.gz',
     license='MIT',
     author='Bennett Goble',
     author_email='nivardus@gmail.com',

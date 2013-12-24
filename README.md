@@ -43,13 +43,13 @@ object. See the [example application][examples].
 
 In addition, if the configuration value SL_PARSE_XHEADERS is True
 (default) then SL objects' [X-SecondLife][headers] headers are parsed into a 
-*SLRequestObject* available as the attribute *sl_object*:
+*SLRequestObject* available as the attribute *sl*:
 
 ```python
 @app.route('/')
 def index():
     if request.from_sl:
-        return 'Hello, %s!' % request.sl_object.name
+        return 'Hello, %s!' % request.sl.name
     else:
         return 'Hello, visitor!'
 ```
